@@ -23,7 +23,7 @@ import sys, unicodedata, string, json
 # used with sys.argv to determine which element contains our message
 PARAM_MSG = 1
 # location of emotions.csv file on system
-EMO_FILE = "/Users/zachalam/Programming/empathy/emotion.csv"
+EMO_FILE = "../empathy/emotion.csv"
 # column header positions for emotions.csv
 EMO_TWEETID = 0
 EMO_EMOTION = 1
