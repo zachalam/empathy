@@ -10,18 +10,26 @@ In empathy.py - Ensure that the EMO_FILE constant is pointing to the "emotion.cs
 EMO_FILE = "../empathy/emo.csv"
 ```
 
-Usage
+Usage: Analyze Text
 -----------------------------
 Simply call spark-submit with empathy. Pass the text to be analyzed as a second parameter.
 ```
-time ./bin/spark-submit --master local[4] /path/to/empathy/empathy.py "I love this company. You guys provide excellent support." > OUTPUT
+time ./bin/spark-submit /path/to/empathy/empathy.py "I love this company. You guys provide excellent support." > OUTPUT
+```
+
+Usage: Teach Emotion *NEW*
+-----------------------------
+Empathy can become smarter! Simply pass it a string AND an emotion, and empathy will store them in it's RDD (influencing emotions in the future).
+Simply call spark-submit with empathy. Pass the text to be analyzed as a second parameter. The third parameter is a emotion string (ie: happiness).
+```
+time ./bin/spark-submit /path/to/empathy/empathy.py "I love this company. You guys provide excellent support." "happiness" > OUTPUT
 ```
 
 Example output
 -----------------------------
 Output is returned as a JSON-parsable string.
 
-Example Call: I love this company. You guys provide excellent support.
+Example Call: "I love this company. You guys provide excellent support."
 ```
 {"emotion": "love",
 "message": "I love this company. You guys provide excellent support.",

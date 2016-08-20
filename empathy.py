@@ -15,7 +15,7 @@
 #
 
 """empathy.py"""
-from pyspark import SparkContext
+from pyspark import SparkConf, SparkContext
 import sys, unicodedata, string, json
 
 # init a few constants
@@ -27,13 +27,16 @@ PARAM_EMO = 2
 PARAM_COUNT_ANALYZE = 2
 
 # location of emotions.csv file on system
-EMO_FILE = "../empathy/emo.csv"
+EMO_FILE = "../empathy/emotions.csv"
 # column header positions for emotions.csv
 EMO_EMOTION = 0
 EMO_MESSAGE = 1
 # the number of words in a matching group
 # higher (more specific, less results)
 MATCH_SIZE = 3
+# number of partions for RDD (hard storage)
+# increase number for increased efficiency.
+RDD_PARTITIONS = 1
 
 # define function calls
 # ----------------------------
@@ -84,8 +87,13 @@ def highest_score(emotions,sentence_num):
 # emo_rdd - spark RDD (RDD)
 # message - message from user, command line (string)
 # emotion - emotion to teach it (string)
-# def empathy_teach(emo_rdd,message,emotion):
+def empathy_teach(emo_rdd,message,emotion,sc):
+    newline = sc.parallelize([emotion+","+message])
+    new_rdd = newline.union(emo_rdd)
+    new_rdd.coalesce(RDD_PARTITIONS).saveAsTextFile(EMO_FILE)
 
+    #output empathy taught JSON response
+    print json.dumps({'emotion': emotion, 'status': 'accepted'})
 
 
 # main programming function - analyze text for emotion
@@ -117,8 +125,9 @@ def empathy_analyze(emo_rdd,message):
             for i in range(0,len(words)-MATCH_SIZE+1,1)]
 
             # build filtered rdd with these matching mini_messages
+            # split line (line.split) at most 1 time (second param)
             messages_rdd = emo_rdd.filter(lambda line: \
-            any(msg in line.split(",")[EMO_MESSAGE] for msg in mini_messages))
+            any(msg in line.split(",",1)[EMO_MESSAGE] for msg in mini_messages))
             #messages_rdd.saveAsTextFile(EMO_FILE + "2")
 
             # sum up scores in this sentence
@@ -168,7 +177,12 @@ if len(sys.argv) < PARAM_COUNT_ANALYZE:
 
 # init SparkContext & load emotions as RDD
 # ----------------------------
-sc = SparkContext("local", "empathy")
+sparkConf = SparkConf() \
+             .setMaster("local[4]") \
+             .setAppName("empathy") \
+             .set("spark.hadoop.validateOutputSpecs", "false")
+
+sc = SparkContext(conf=sparkConf)
 emo_rdd = sc.textFile(EMO_FILE).cache()
 
 
@@ -191,3 +205,4 @@ if len(sys.argv) == PARAM_COUNT_ANALYZE:
 else:
     # okay, teach
     emotion = sys.argv[PARAM_EMO]
+    empathy_teach(emo_rdd,message,emotion,sc)
