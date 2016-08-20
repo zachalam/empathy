@@ -20,14 +20,20 @@ import sys, unicodedata, string, json
 
 # init a few constants
 # ----------------------------
-# used with sys.argv to determine which element contains our message
+# used with sys.argv to access incoming data params.
 PARAM_MSG = 1
+PARAM_EMO = 2
+# number of parameters called to analyze
+PARAM_COUNT_ANALYZE = 2
+
 # location of emotions.csv file on system
 EMO_FILE = "../empathy/emo.csv"
 # column header positions for emotions.csv
 EMO_EMOTION = 0
 EMO_MESSAGE = 1
-
+# the number of words in a matching group
+# higher (more specific, less results)
+MATCH_SIZE = 3
 
 # define function calls
 # ----------------------------
@@ -61,7 +67,7 @@ def highest_score(emotions,sentence_num):
         the_emotion = emotion[0]
         the_score = emotion[1]
 
-        # if emotions array provided a sentence number use it
+        # if emotions array provided a sentence number: resave it
         if len(emotion) >= 3: the_sentence = emotion[2]
         else: the_sentence = sentence_num
 
@@ -73,11 +79,90 @@ def highest_score(emotions,sentence_num):
     # return the highest scoring emotion
     return highest_emotion
 
+# main programming function - teach empathy new emotion
+# by adding it to the emo.csv RDD
+# emo_rdd - spark RDD (RDD)
+# message - message from user, command line (string)
+# emotion - emotion to teach it (string)
+# def empathy_teach(emo_rdd,message,emotion):
+
+
+
+# main programming function - analyze text for emotion
+# by comparing it to matching RDD strings
+# emo_rdd - spark RDD (RDD)
+# message - message from user, command line (string)
+def empathy_analyze(emo_rdd,message):
+    # break apart each sentence in message
+    sentences = message.split(".")
+
+    # keep track of emotions in each sentence
+    emotion_scores = []
+    # keep track of each sentence
+    current_sentence = 1
+
+    for sentence in sentences:
+        # clean setence of punctuation/extra chars.
+        sentence = clean_string(sentence)
+        # split apart message string into individual words
+        words = sentence.split(" ")
+
+        # only analyze sentence with at least 2 words
+        if len(words) >= MATCH_SIZE:
+
+            # combine words into groups of length "MATCH_SIZE".
+            # given message = "how are you doing today"
+            # mini_messages = ['how are you, 'are you doing', 'you doing today']
+            mini_messages = [" ".join(words[i:i+MATCH_SIZE]) \
+            for i in range(0,len(words)-MATCH_SIZE+1,1)]
+
+            # build filtered rdd with these matching mini_messages
+            messages_rdd = emo_rdd.filter(lambda line: \
+            any(msg in line.split(",")[EMO_MESSAGE] for msg in mini_messages))
+            #messages_rdd.saveAsTextFile(EMO_FILE + "2")
+
+            # sum up scores in this sentence
+            messages_rdd = messages_rdd.map(lambda line: line.split(",")[EMO_EMOTION])
+            # get a score for each emotion
+            emotions = messages_rdd.countByValue().items()
+
+            # DEBUG Emotions var
+            # print emotions
+
+            # if no emotions do nothing this round
+            if emotions:
+
+                # save all emotion scores in array
+                highest_emotion = highest_score(emotions,current_sentence)
+
+                # save the highest scoring emotion in this sentence.
+                emotion_scores.append(highest_emotion)
+                #print highest_emotion
+
+        # get ready for next sentence
+        current_sentence += 1
+
+    # finalize strongest emotion
+    # ----------------------------
+    highscore = highest_score(emotion_scores,[])
+    emotion = highscore[0]
+    sentence = highscore[2]
+
+    # output final result as JSON string
+    print json.dumps({'emotion': emotion, 'sentence': sentence, 'message': message})
+
+
+# ----------------------------
+# ############################
+# ############################
+# ############################
+# ----------------------------
+
 
 # verify script called correctly
 # ----------------------------
-if len(sys.argv) != 2:
-    print("Error! Usage: empathy <message>")
+if len(sys.argv) < PARAM_COUNT_ANALYZE:
+    print("Error! Usage: empathy <message> <emotion(optional)>")
     exit(-1)
 
 
@@ -92,66 +177,17 @@ emo_rdd = sc.textFile(EMO_FILE).cache()
 emo_rdd = emo_rdd.map(clean_rdd_line)
 
 
-# begin message analysis
+# obtain message from user.
 # ----------------------------
 # obtain message from command
 message = sys.argv[PARAM_MSG]
-# break apart each sentence in message
-sentences = message.split(".")
 
-# how many words to group together
-span = 3
-# keep track of emotions in each sentence
-emotion_scores = []
-# keep track of each sentence
-current_sentence = 1
 
-for sentence in sentences:
-    # clean setence of punctuation/extra chars.
-    sentence = clean_string(sentence)
-    # split apart message string into individual words
-    words = sentence.split(" ")
-
-    # only analyze sentence with at least 2 words
-    if len(words) >= span:
-
-        # combine words into groups of length "span".
-        # given message = "how are you doing today"
-        # mini_messages = ['how are you, 'are you doing', 'you doing today']
-        mini_messages = [" ".join(words[i:i+span]) \
-        for i in range(0,len(words)-span+1,1)]
-
-        # build filtered rdd with these matching mini_messages
-        messages_rdd = emo_rdd.filter(lambda line: \
-        any(msg in line.split(",")[EMO_MESSAGE] for msg in mini_messages))
-        #messages_rdd.saveAsTextFile(EMO_FILE + "2")
-
-        # sum up scores in this sentence
-        messages_rdd = messages_rdd.map(lambda line: line.split(",")[EMO_EMOTION])
-        # get a score for each emotion
-        emotions = messages_rdd.countByValue().items()
-
-        # DEBUG Emotions var
-        # print emotions
-
-        # if no emotions do nothing this round
-        if emotions:
-
-            # save all emotion scores in array
-            highest_emotion = highest_score(emotions,current_sentence)
-
-            # save the highest scoring emotion in this sentence.
-            emotion_scores.append(highest_emotion)
-            #print highest_emotion
-
-    # get ready for next sentence
-    current_sentence += 1
-
-# finalize strongest emotion
-# ----------------------------
-highscore = highest_score(emotion_scores,[])
-emotion = highscore[0]
-sentence = highscore[2]
-
-# output final result as JSON string
-print json.dumps({'emotion': emotion, 'sentence': sentence, 'message': message})
+# analyze message OR teach empathy new tricks
+# depending on how many params were sent.
+if len(sys.argv) == PARAM_COUNT_ANALYZE:
+    # okay, analyze
+    empathy_analyze(emo_rdd,message)
+else:
+    # okay, teach
+    emotion = sys.argv[PARAM_EMO]

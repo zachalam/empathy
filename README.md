@@ -1,7 +1,7 @@
 # empathy
 The goal of empathy is simple: Improve customer happiness by categorizing support tickets based on their emotion.
 
-When a customer submits a support ticket through your site: run the text through empathy and save the emotion. Use this emotion to find and respond to unhappy customers (prioritize "sadness" over "happy" tickets) faster.
+When a customer submits a support ticket through your site: run the text through empathy and save the emotion. Use this emotion to find and respond to unhappy customers (prioritize "angry" over "happy" tickets) faster.
 
 Installation
 -----------------------------
