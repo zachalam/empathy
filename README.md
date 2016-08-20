@@ -24,7 +24,8 @@ Output is returned as a JSON-parsable string.
 Example Call: I love this company. You guys provide excellent support.
 ```
 {"emotion": "love",
-"message": "I love this company. You guys provide excellent support.", "sentence": 1}
+"message": "I love this company. You guys provide excellent support.",
+"sentence": 1}
 ```
 Emotion: love
 
@@ -32,7 +33,8 @@ Emotion: love
 Example Call: The support at this company isn't good. I'm very unhappy. I won't be ordering from you again.
 ```
 {"emotion": "sadness",
-"message": "The support at this company isn't good. I'm very unhappy. I won't be ordering from you again.", "sentence": 3}
+"message": "The support at this company isn't good. I'm very unhappy. I won't be ordering from you again.",
+"sentence": 3}
 ```
 Emotion: sadness
 
@@ -44,5 +46,5 @@ Emotion: sadness
 Data Source
 -----------------------------
 [Sentiment Analysis: Emotion in Text
-](https://www.crowdflower.com/wp-content/uploads/2016/07/text_emotion.csv)
-In a variation on the popular task of sentiment analysis, this dataset contains labels for the emotional content (such as happiness, sadness, and anger) of texts. Hundreds to thousands of examples across 13 labels.
+](https://www.crowdflower.com/wp-content/uploads/2016/07/text_emotion.csv) -
+In a variation on the popular task of sentiment analysis, this dataset contains labels for the emotional content (such as happiness, sadness, and anger) of texts. Hundreds to thousands of examples across 13 labels. (crowdflower.com)
