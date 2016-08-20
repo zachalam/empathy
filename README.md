@@ -7,7 +7,7 @@ Installation
 -----------------------------
 In empathy.py - Ensure that the EMO_FILE constant is pointing to the "emotion.csv" location on disk.
 ```
-EMO_FILE = "../empathy/emotion.csv"
+EMO_FILE = "../empathy/emo.csv"
 ```
 
 Usage

@@ -132,7 +132,7 @@ for sentence in sentences:
         emotions = messages_rdd.countByValue().items()
 
         # DEBUG Emotions var
-        print emotions
+        # print emotions
 
         # if no emotions do nothing this round
         if emotions:
