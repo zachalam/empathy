@@ -23,12 +23,10 @@ import sys, unicodedata, string, json
 # used with sys.argv to determine which element contains our message
 PARAM_MSG = 1
 # location of emotions.csv file on system
-EMO_FILE = "../empathy/emotion.csv"
+EMO_FILE = "../empathy/emo.csv"
 # column header positions for emotions.csv
-EMO_TWEETID = 0
-EMO_EMOTION = 1
-EMO_AUTHOR = 2
-EMO_MESSAGE = 3
+EMO_EMOTION = 0
+EMO_MESSAGE = 1
 
 
 # define function calls
@@ -50,8 +48,8 @@ def clean_unicode(the_string):
 # clean up a line in the RDD
 def clean_rdd_line(the_line):
     line = the_line.split(",")
-    return line[EMO_TWEETID] + ',' + clean_unicode(line[EMO_EMOTION]) + ',' \
-    + line[EMO_AUTHOR] + ',' + clean_unicode(line[EMO_MESSAGE])
+    return clean_unicode(line[EMO_EMOTION]) + ',' \
+    + clean_unicode(line[EMO_MESSAGE])
 
 # return the highest scoring emotion in array.
 def highest_score(emotions,sentence_num):
@@ -134,7 +132,7 @@ for sentence in sentences:
         emotions = messages_rdd.countByValue().items()
 
         # DEBUG Emotions var
-        # print emotions
+        print emotions
 
         # if no emotions do nothing this round
         if emotions:
@@ -152,7 +150,7 @@ for sentence in sentences:
 # finalize strongest emotion
 # ----------------------------
 highscore = highest_score(emotion_scores,[])
-emotion = clean_unicode(highscore[0])
+emotion = highscore[0]
 sentence = highscore[2]
 
 # output final result as JSON string
