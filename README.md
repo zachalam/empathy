@@ -5,9 +5,9 @@ When a customer submits a support ticket through your site: run the text through
 
 Installation
 -----------------------------
-In empathy.py - Ensure that the EMO_FILE constant is pointing to the "emotion.csv" location on disk.
+In empathy.py - Ensure that the EMO_FILE constant is pointing to the "emotions.csv" directory on disk.
 ```
-EMO_FILE = "../empathy/emo.csv"
+EMO_FILE = "../empathy/emotions.csv"
 ```
 
 Usage: Analyze Text
@@ -17,7 +17,7 @@ Simply call spark-submit with empathy. Pass the text to be analyzed as a second 
 time ./bin/spark-submit /path/to/empathy/empathy.py "I love this company. You guys provide excellent support." > OUTPUT
 ```
 
-Usage: Teach Emotion *NEW*
+*NEW* - Usage: Teach Emotion
 -----------------------------
 Empathy can become smarter! Simply pass it a string AND an emotion, and empathy will store them in it's RDD (influencing emotions in the future).
 Simply call spark-submit with empathy. Pass the text to be analyzed as a second parameter. The third parameter is a emotion string (ie: happiness).

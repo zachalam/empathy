@@ -26,7 +26,7 @@ PARAM_EMO = 2
 # number of parameters called to analyze
 PARAM_COUNT_ANALYZE = 2
 
-# location of emotions.csv file on system
+# location of emotions.csv directory on system
 EMO_FILE = "../empathy/emotions.csv"
 # column header positions for emotions.csv
 EMO_EMOTION = 0
